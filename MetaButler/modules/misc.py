@@ -91,17 +91,15 @@ def get_id(update: Update, context: CallbackContext):
                 parse_mode=ParseMode.HTML,
             )
 
+    elif chat.type == "private":
+        msg.reply_text(
+            f"Your id is <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
+        )
+
     else:
-
-        if chat.type == "private":
-            msg.reply_text(
-                f"Your id is <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
-            )
-
-        else:
-            msg.reply_text(
-                f"This group's id is <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
-            )
+        msg.reply_text(
+            f"This group's id is <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
+        )
 
 @metacmd(command='gifid')
 def gifid(update: Update, _):
@@ -246,12 +244,8 @@ def github(update: Update, _):
 
         for x, y in usr.items():
             if x in whitelist:
-                if x in difnames:
-                    x = difnames[x]
-                else:
-                    x = x.title()
-
-                if x == 'Account created at' or x == 'Last updated':
+                x = difnames.get(x, x.title())
+                if x in ['Account created at', 'Last updated']:
                     y = datetime.datetime.strptime(y, "%Y-%m-%dT%H:%M:%SZ")
 
                 if y not in goaway:
@@ -338,7 +332,7 @@ def stats(update, context):
     ]
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
-    status += f"*• Commit*: `{sha[0:9]}`\n"
+    status += f'*• Commit*: `{sha[:9]}`\n'
     try:
         update.effective_message.reply_text(status +
             "\n*Bot statistics*:\n"
@@ -407,7 +401,7 @@ def wiki(update: Update, context: CallbackContext):
     bot = context.bot
     kueri = re.split(pattern="wiki", string=update.effective_message.text)
     wikipedia.set_lang("en")
-    if len(str(kueri[1])) == 0:
+    if str(kueri[1]) == '':
         update.effective_message.reply_text("Enter keywords!")
     else:
         try:
