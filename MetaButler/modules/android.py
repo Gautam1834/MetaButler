@@ -32,20 +32,20 @@ def sanitize_data(data: dict, chat_id: int) -> Tuple[str, str, str]:
 async def bliss(event):
     if event.sender_id is None:
         return
-    
+
     chat_id = event.chat_id
     try:
         device_code__ = event.pattern_match.group(1)
         device_code = urllib.parse.quote_plus(device_code__)
     except Exception:
         device_code = ''
-    
+
     if device_code == '':
         reply_text = gs(chat_id, "cmd_example").format('bliss')
         return await event.reply(reply_text, link_preview=False)
-    
+
     url = 'https://downloads.blissroms.org/api/v1/updater/los/{device_code}/{build}/'
-    device_data = list()
+    device_data = []
     for build in ['vanilla', 'gapps']:
         build_url = url.format(device_code=device_code, build=build)
         req = get(build_url)
@@ -71,7 +71,7 @@ async def bliss(event):
         if download_url is not None:
             keyboard.append([custom.Button.url(f'Download {str(device_build).capitalize()} build', download_url)])
     base_msg = str(base_msg).strip()
-    if len(keyboard) == 0:
+    if not keyboard:
         return await event.reply(base_msg)
     return await event.reply(base_msg, buttons=keyboard, link_preview=False)
 
@@ -226,40 +226,31 @@ async def bootleggers(event):
     if fetch.status_code == 200:
         nestedjson = json.loads(fetch.content)
 
-        if codename.lower() == 'x00t':
-            devicetoget = 'X00T'
-        else:
-            devicetoget = codename.lower()
-
+        devicetoget = 'X00T' if codename.lower() == 'x00t' else codename.lower()
         reply_text = ""
-        devices = {}
-
-        for device, values in nestedjson.items():
-            devices.update({device: values})
+        devices = dict(nestedjson.items())
 
         if devicetoget in devices:
+            dontneedlist = ['id', 'filename', 'download', 'xdathread']
+            peaksmod = {
+                'fullname': 'Device name',
+                'buildate': 'Build date',
+                'buildsize': 'Build size',
+                'downloadfolder': 'SourceForge folder',
+                'mirrorlink': 'Mirror link',
+                'xdathread': 'XDA thread'
+            }
             for oh, baby in devices[devicetoget].items():
-                dontneedlist = ['id', 'filename', 'download', 'xdathread']
-                peaksmod = {
-                    'fullname': 'Device name',
-                    'buildate': 'Build date',
-                    'buildsize': 'Build size',
-                    'downloadfolder': 'SourceForge folder',
-                    'mirrorlink': 'Mirror link',
-                    'xdathread': 'XDA thread'
-                }
                 if baby and oh not in dontneedlist:
-                    if oh in peaksmod:
-                        oh = peaksmod[oh]
-                    else:
-                        oh = oh.title()
-
-                    if oh == 'SourceForge folder':
+                    oh = peaksmod.get(oh, oh.title())
+                    if (
+                        oh == 'Mirror link'
+                        and baby != "Error404"
+                        or oh != 'Mirror link'
+                        and oh == 'SourceForge folder'
+                    ):
                         reply_text += f"\n**{oh}:** [Here]({baby})\n"
-                    elif oh == 'Mirror link':
-                        if not baby == "Error404":
-                            reply_text += f"\n**{oh}:** [Here]({baby})\n"
-                    else:
+                    elif oh != 'Mirror link':
                         reply_text += f"\n**{oh}:** `{baby}`"
 
             reply_text += gs(chat_id, "xda_thread").format(

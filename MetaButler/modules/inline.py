@@ -40,31 +40,6 @@ def inlinequery(update: Update, _) -> None:
     user = update.effective_user
 
     results: List = []
-    inline_help_dicts = [
-        {
-            "title": "SpamProtection INFO",
-            "description": "Look up a person/bot/channel/chat on @Intellivoid SpamProtection API",
-            "message_text": "Click the button below to look up a person/bot/channel/chat on @Intellivoid SpamProtection API using "
-                            "username or telegram id",
-            "thumb_urL": "https://telegra.ph/file/888b20d2f85e53d692ebd.jpg",
-            "keyboard": ".spb ",
-        },
-        {
-            "title": "Account info on MetaButler",
-            "description": "Look up a Telegram account in MetaButler database",
-            "message_text": "Click the button below to look up a person in MetaButler database using their Telegram ID",
-            "thumb_urL": "https://telegra.ph/file/888b20d2f85e53d692ebd.jpg",
-            "keyboard": ".info ",
-        },
-        {
-            "title": "About",
-            "description": "Know about MetaButler",
-            "message_text": "Click the button below to get to know about MetaButler.",
-            "thumb_urL": "https://telegra.ph/file/888b20d2f85e53d692ebd.jpg",
-            "keyboard": ".about ",
-        },
-    ]
-
     inline_funcs = {
         ".spb": spb,
         ".info": inlineinfo,
@@ -74,6 +49,31 @@ def inlinequery(update: Update, _) -> None:
     if (f := query.split(" ", 1)[0]) in inline_funcs:
         inline_funcs[f](remove_prefix(query, f).strip(), update, user)
     else:
+        inline_help_dicts = [
+            {
+                "title": "SpamProtection INFO",
+                "description": "Look up a person/bot/channel/chat on @Intellivoid SpamProtection API",
+                "message_text": "Click the button below to look up a person/bot/channel/chat on @Intellivoid SpamProtection API using "
+                                "username or telegram id",
+                "thumb_urL": "https://telegra.ph/file/888b20d2f85e53d692ebd.jpg",
+                "keyboard": ".spb ",
+            },
+            {
+                "title": "Account info on MetaButler",
+                "description": "Look up a Telegram account in MetaButler database",
+                "message_text": "Click the button below to look up a person in MetaButler database using their Telegram ID",
+                "thumb_urL": "https://telegra.ph/file/888b20d2f85e53d692ebd.jpg",
+                "keyboard": ".info ",
+            },
+            {
+                "title": "About",
+                "description": "Know about MetaButler",
+                "message_text": "Click the button below to get to know about MetaButler.",
+                "thumb_urL": "https://telegra.ph/file/888b20d2f85e53d692ebd.jpg",
+                "keyboard": ".about ",
+            },
+        ]
+
         for ihelp in inline_help_dicts:
             results.append(
                 article(
@@ -154,17 +154,16 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
         [
             [
                 InlineKeyboardButton(
-                    text="Report Error",
-                    url=f"https://t.me/MetaButler",
+                    text="Report Error", url='https://t.me/MetaButler'
                 ),
                 InlineKeyboardButton(
                     text="Search again",
                     switch_inline_query_current_chat=".info ",
                 ),
-
-            ],
+            ]
         ]
-        )
+    )
+
 
     results = [
         InlineQueryResultArticle(
@@ -185,29 +184,19 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
     user_id = update.effective_user.id
     user = context.bot.get_chat(user_id)
     sql.update_user(user.id, user.username)
-    about_text = f"""
-    MetaButler (@{context.bot.username})
-    Maintained by [Destroyer32](t.me/destroyer32)
-    Built with ❤️ using python-telegram-bot v{str(__version__)}
-    Running on Python {python_version()}
-    """
+    about_text = f'\x1f    MetaButler (@{context.bot.username})\x1f    Maintained by [Destroyer32](t.me/destroyer32)\x1f    Built with ❤️ using python-telegram-bot v{__version__}\x1f    Running on Python {python_version()}\x1f    '
+
     results: list = []
     kb = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(
-                    text="Support",
-                    url=f"https://t.me/MetaButler",
+                    text="Support", url='https://t.me/MetaButler'
                 ),
                 InlineKeyboardButton(
-                    text="Channel",
-                    url=f"https://t.me/metabutlernews",
+                    text="Channel", url='https://t.me/metabutlernews'
                 ),
-                InlineKeyboardButton(
-                    text='Ping',
-                    callback_data='pingCB'
-                ),
-
+                InlineKeyboardButton(text='Ping', callback_data='pingCB'),
             ],
             [
                 InlineKeyboardButton(
@@ -215,7 +204,9 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
                     url="https://www.github.com/DESTROYER-32/MetaButler",
                 ),
             ],
-        ])
+        ]
+    )
+
 
     results.append(
 
@@ -253,24 +244,24 @@ def spb(query: str, update: Update, context: CallbackContext) -> None:
         response = a["success"]
         if response is True:
             date = a["results"]["last_updated"]
-            stats = f"*◢ Intellivoid• SpamProtection Info*:\n"
+            stats = '*◢ Intellivoid• SpamProtection Info*:\n'
             stats += f' • *Updated on*: `{datetime.fromtimestamp(date).strftime("%Y-%m-%d %I:%M:%S %p")}`\n'
 
             if a["results"]["attributes"]["is_potential_spammer"] is True:
-                stats += f" • *User*: `USERxSPAM`\n"
+                stats += ' • *User*: `USERxSPAM`\n'
             elif a["results"]["attributes"]["is_operator"] is True:
-                stats += f" • *User*: `USERxOPERATOR`\n"
+                stats += ' • *User*: `USERxOPERATOR`\n'
             elif a["results"]["attributes"]["is_agent"] is True:
-                stats += f" • *User*: `USERxAGENT`\n"
+                stats += ' • *User*: `USERxAGENT`\n'
             elif a["results"]["attributes"]["is_whitelisted"] is True:
-                stats += f" • *User*: `USERxWHITELISTED`\n"
+                stats += ' • *User*: `USERxWHITELISTED`\n'
 
             stats += f' • *Type*: `{a["results"]["entity_type"]}`\n'
             stats += (
                 f' • *Language*: `{a["results"]["language_prediction"]["language"]}`\n'
             )
             stats += f' • *Language Probability*: `{a["results"]["language_prediction"]["probability"]}`\n'
-            stats += f"*Spam Prediction*:\n"
+            stats += '*Spam Prediction*:\n'
             stats += f' • *Ham Prediction*: `{a["results"]["spam_prediction"]["ham_prediction"]}`\n'
             stats += f' • *Spam Prediction*: `{a["results"]["spam_prediction"]["spam_prediction"]}`\n'
             stats += f'*Blacklisted*: `{a["results"]["attributes"]["is_blacklisted"]}`\n'
@@ -288,16 +279,16 @@ def spb(query: str, update: Update, context: CallbackContext) -> None:
         [
             [
                 InlineKeyboardButton(
-                    text="Report Error",
-                    url=f"https://t.me/MetaButler",
+                    text="Report Error", url='https://t.me/MetaButler'
                 ),
                 InlineKeyboardButton(
                     text="Search again",
                     switch_inline_query_current_chat=".spb ",
                 ),
+            ]
+        ]
+    )
 
-            ],
-        ])
 
     a = "the entity was not found"
     results = [
